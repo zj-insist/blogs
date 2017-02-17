@@ -34,4 +34,4 @@ Web App曾经因为开发成本相对低，可以动态更新火过一段时间�
 ![RNApp](./Images/RNApp.png  "RNApp") 
 ![WebApp](./Images/WebApp.png "WebApp")
 
-以上两张图分别是RNApp和WebApp的一个简单的Demo展示
+以上两张图分别是RNApp和WebApp的一个简单的Demo展示，为了更好地
