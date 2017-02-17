@@ -2,14 +2,14 @@
 
 最近三周，从零开始学习了当前较为火热的React Native技术，使用RN在iOS平台完成了一些小Demo和一个静态的商品详情页。整体来说，RN对于一个没有任何前端开发经验的Native程序员来说，学习曲线还是相当陡峭的。不仅要接触学习RN框架，还要掌握JS的语言特性和相关机制，而JS的编程习惯和一些规范，和此前理解的OO编程思想还是有相当大差异。此外，一项新兴的技术，其相关的参考资料和案例都是很少的。再加上RN的版本也在快速的迭代中，可能仅仅三个月前的Demo，在当前版本就已经不能运行了。因此，整个过程中还是踩了相当多的坑。当然，踩得坑多了，还是有些收获的。  
 三周的学习，主要了解以下几个方面：  
-0. 什么是React Native
-1. iOS平台下，React Native是如何工作的
-2. 学习JavaScript ES6标准
-3. 搭建开发环境以及遇到的环境中的一些坑
-4. IDE工作环境配置以及DeBug工具使用
-5. 使用RN构建Demo的一些体会
+1. 什么是React Native
+2. iOS平台下，React Native是如何工作的
+3. 学习JavaScript ES6标准
+4. 搭建开发环境以及遇到的环境中的一些坑
+5. IDE工作环境配置以及DeBug工具使用
+6. 使用RN构建Demo的一些体会
 
-## **0.关于React Native**
+## **1.关于React Native**
 
 首先要了解什么是React Native，以下是官方的介绍：
 >React Native enables you to build world-class application experiences on native platforms using a consistent developer experience based on JavaScript and React. The focus of React Native is on developer efficiency across all the platforms you care about - learn once, write anywhere. Facebook uses React Native in multiple production apps and will continue investing in React Native.  
