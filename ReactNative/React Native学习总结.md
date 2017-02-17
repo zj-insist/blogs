@@ -31,4 +31,7 @@ Native端的开发成本是一个一直被诟病的问题。理论来说，市�
 ##### 2.用户体验以及性能  
 
 Web App曾经因为开发成本相对低，可以动态更新火过一段时间，之后却又因为，加载速度缓慢，用户交互体验不够良好，过多占用性能等问题冷落了下来。RN同样是使用JS这种动态语言实现整个页面的构建，但不同的是，它却是实实在在的原生应用，在JS代码中的各个标签，都会转化为Native的UI组件。
-![WebApp]()
+![RNApp](./Images/RNApp.png  "RNApp") 
+![WebApp](./Images/WebApp.png "WebApp")
+
+以上两张图分别是RNApp和WebApp的一个简单的Demo展示
