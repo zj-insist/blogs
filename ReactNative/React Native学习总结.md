@@ -28,10 +28,53 @@ Native端的开发成本是一个一直被诟病的问题。理论来说，市�
 
 放一张介绍 React 和 RN 的图，可以看到RN继承了Web App的优势，只需要一条技术线的学习，便可以开发兼容多端的应用，这也和Facebook官方宣称的`"learn once, write anywhere"`的思想相当吻合。在RN在组件和API设计上，也做到了尽量同时兼容多个平台，从当前的更新趋势看，不同平台的组件和API差异都将被慢慢抹去，最终形成一个统一的平台，而不再需要去关注底层的原生平台是什么。
 
-##### 2.用户体验以及性能  
+#### 2.用户体验以及性能  
 
-Web App曾经因为开发成本相对低，可以动态更新火过一段时间，之后却又因为，加载速度缓慢，用户交互体验不够良好，过多占用性能等问题冷落了下来。RN同样是使用JS这种动态语言实现整个页面的构建，但不同的是，它却是实实在在的原生应用，在JS代码中的各个标签，都会转化为Native的UI组件。
-![RNApp](./Images/RNApp.png  "RNApp") 
+Web App曾经因为开发成本相对低，可以动态更新火过一段时间，之后却又因为，加载速度缓慢，用户交互体验不够良好，过多占用性能等问题冷落了下来。RN同样是使用JS这种动态语言实现整个页面的构建，但不同的是，它却是实实在在的原生应用，在JS代码中的各个标签，都会转化为Native的UI组件。  
+![RNApp](./Images/RNApp.png  "RNApp")   
 ![WebApp](./Images/WebApp.png "WebApp")
 
-以上两张图分别是RNApp和WebApp的一个简单的Demo展示，为了更好地
+以上两张图分别是RNApp和WebApp的一个简单的Demo展示，为了更好地对比，尽量保证了两个Demo内容的统一。先不谈交互，这两个界面都是在用户层面的展示内容，除掉webView的加载进度条，基本是毫无区别的。之后，先看一下RNApp的View Tree和windows的展示：  
+![RNView](./Images/RNView.png  "RNView")   
+![RNWindows](./Images/RNWindows.png "RNWindows")  
+可以看到，RNApp确实与宣称的`真正的原生`是一致的。在界面构建时候，组织了多少containor view，最终都会显示在界面上。从整个windows的结构也看到，界面的组织都是使用的RCT开头的原生组件，这些才是在app中真正工作的组件，而不像web一样使用的是HTML元素。  
+之后，是WebApp的View Tree和windows：  
+![WebView](./Images/WebView.png  "WebView")   
+![WebWindows](./Images/WebWindows.png "WebWindows")  
+很明显的对比，不管WebApp的界面上展示了多少元素，在View Tree中都只有一个WebView的容器，这点从整个windows的结构也可以看到。  
+关于加载速度，可能并不能给出详尽的数据，但可以整体感觉到RN的加载速度并没有比原生慢多少，甚至基于JS这种脚本语言的特性，RN还可以做到动态更新，当我更改了一处的代码，并不需要重新编译整个APP，而只需要像刷新网页一样刷新一下界面便可看到这些更改。然后说说用户体验，可能经过一系列的优化，WebView的交互体验已经可以不输原生。然而，RNApp中，真正构建App的还是原生组件，可以说，整个RN的交互体验，应该是和原生应用一致的。
+
+#### 3.动态UI和热更新
+
+Native应用的很大一项问题便是每次更新都需要重新发包，在iOS平台甚至需要重新进行审核，所以很多App的活动页面都是使用web构建保障可以在后台进行动态的配置UI界面。而使用RN这种技术，由于JS天然动态性，可以随时下发数据和代码，随时定制UI，相对于Web制作的页面，RN拥有更佳的性能。关于热更新，iOS中用的较多的是JSPatch，都是用来热修复线上的一部分Bug，而很少用来去新增业务功能，而其他的热更新方案都相当复杂，有的甚至需要重启App才生效。但是使用JS语言就不一样了，动态语言的一大好处就是可以随时执行，随时替换，使用RN之后，就可以做到随时运行更新JS代码，实现起来比原生的方案简单很多。  
+  
+简单的说，RN是为了让我们使用JS这种动态语言构建Native应用，同时，它脱离了iOS平台上传统的MVC架构，引入了React的MVVM编程思想，集成了Native和Web应用的优点，降低了开发成本。
+
+## **2.React Native工作原理**
+
+关于开发环境的搭建和各种配置，网上有很多相应的资源，在此不做介绍。这章主要介绍一下RN项目和Native项目的不同，以及RN框架在iOS平台是如何工作的。  
+首先使用`react-native init`命令创建一个RN项目，之后从ios文件夹中的xcode项目文件打开工程。整个项目和从xcode中创建的项目相比，少了Main.storyboard，多出了很多RCT开头的library，而这些libraries便是RN框架工作的基础，其中React完成了OC和JS的通信。  
+![](./Images/libraries.png)  
+
+打开App的入口文件AppDelegate.m：
+``` objectivec
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
+{
+  NSURL *jsCodeLocation;
+
+  jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index.ios" fallbackResource:nil];
+
+  RCTRootView *rootView = [[RCTRootView alloc] initWithBundleURL:jsCodeLocation
+                                                      moduleName:@"Communication"
+                                               initialProperties:nil
+                                                   launchOptions:launchOptions];
+  rootView.backgroundColor = [[UIColor alloc] initWithRed:1.0f green:1.0f blue:1.0f alpha:1];
+
+  self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+  UIViewController *rootViewController = [UIViewController new];
+  rootViewController.view = rootView;
+  self.window.rootViewController = rootViewController;
+  [self.window makeKeyAndVisible];
+  return YES;
+}
+```
