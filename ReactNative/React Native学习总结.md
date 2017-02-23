@@ -56,7 +56,8 @@ Native应用的很大一项问题便是每次更新都需要重新发包，在iO
 首先使用`react-native init`命令创建一个RN项目，之后从ios文件夹中的xcode项目文件打开工程。整个项目和从xcode中创建的项目相比，少了Main.storyboard，多出了很多RCT开头的library，而这些libraries便是RN框架工作的基础，其中React完成了OC和JS的通信。  
 ![](./Images/libraries.png)  
 
-打开App的入口文件AppDelegate.m：
+打开App的入口文件AppDelegate.m，看到入口文件只剩一个程序启动完成的方法：
+
 ``` objectivec
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
@@ -77,4 +78,97 @@ Native应用的很大一项问题便是每次更新都需要重新发包，在iO
   [self.window makeKeyAndVisible];
   return YES;
 }
+```
+与Native不用的是，多出了几个RCT开头的类和其相关方法。首先，从JS端获取iOS的入口文件地址，之后创建一个`RCTRootView`作为整个应用的根视图，创建这个根视图需要几个相关参数，一个是入口文件地址`BundleURL`，一个是初始加载的模块名称`moduleName`,之后是需要传递的参数，最后是应用启动时的一些参数。`moduleName`应该是对应JS文件中的启动模块：  
+``` JavaScript
+AppRegistry.registerComponent('Communication', () => Communication);
+```  
+之后设置window的根视图，显示同常规的启动流程。  
+
+因此，整个App的运行环境应该是在`initWithBundleURL:moduleName:initialProperties:launchOptions:`的时候便已经初始化完成。根据调用堆栈，在初始化rootView之前，首先创建了一个bridge：
+``` objectivec
+  RCTBridge *bridge = [[RCTBridge alloc] initWithBundleURL:bundleURL
+                                            moduleProvider:nil
+                                             launchOptions:launchOptions];
+```  
+
+然后进入rootView的init函数，看到这个bridge作为两个通知的监听对象，它是OC和JS之间的桥梁，整个应用的交互都是依赖这个对象。继续追踪bridge的初始化流程，发现在`setup`中创建了一个BatchedBridge对象，并执行了这个对象的start方法。在这个start函数中，有清晰的官方注释告诉我们这个函数做了哪些工作，包括以下5件事情：
+1. 加载资源代码
+2. 初始化组件模块
+3. 初始化JavaScriptExecutor
+4. 生成模块的配置信息
+5. 执行JavaScript源码
+
+#### 1.加载资源
+
+除了一些配置信息和队列的创建，第一件事便是加载资源：
+```objectivec
+  // Asynchronously load source code
+  [self loadSource:^(NSError *error, NSData *source, __unused int64_t sourceLength) {
+    if (error) {
+      RCTLogWarn(@"Failed to load source: %@", error);
+      dispatch_async(dispatch_get_main_queue(), ^{
+        [weakSelf stopLoadingWithError:error];
+      });
+    }
+```
+注释很简单的说明了，这里加载的是资源代码，那到底是什么资源代码呢？包含了那些内容呢？我们设置一个断点，然后看一下显示：
+![sourceCode](./Images/sourceCode.png)  
+可以看到这是一个1.2M的文件，具体内容好像包含很多相关代码，看起来很像JS，但是这么个格式看肯定吐血啊。那么，这时候就可以借助开源的力量了，改一下start函数的代码，把这个Data保存到一个文件中，因为看着代码很像JS，我改了JS后缀，配合IDE的着色能更清晰的分析，内容如下：  
+![dataImage](./Images/dataImage.png)  
+内容也不多，也就是一个1.2M的JS代码文件，6W多行而已😂  
+看来RN框架帮我们生成了不少代码，那这些代码到底和我们写的JS代码有多少关系呢？测试的工程是以前写过的一个学习JS调用Native方法和组件的Demo，找出一段JS端的代码：
+``` JavaScript
+import TestView from './TestView'
+var QSNativeModuleExample = NativeModules.QSNativeModuleExample;
+
+export default class Communication extends Component {
+  componentDidMount() {
+    QSNativeModuleExample.testPrint("Jack", {
+      height: '1.78m',
+      weight: '7kg'
+    });
+  }
+    render() {
+    return (
+      <View style={styles.container}>
+        <View style={{backgroundColor:'#B9FF61'}}>
+          <Text style={styles.welcome}>
+            Welcome to React Native!
+        </Text>
+        </View>
+        <View style={{backgroundColor:'#FFD854'}}>
+          <Text style={styles.instructions}>
+            To get started, edit index.ios.js
+        </Text>
+        </View>
+        <View style={{backgroundColor:'#FF4FA2'}}>
+          <Text style={styles.instructions}>
+            Press Cmd+R to reload,{'\n'}
+            Cmd+D or shake for dev menu
+        </Text>
+        </View>
+      </View>
+    );
+  }
+}
+```
+然后再生成的文件中搜索`QS`，显示如下：  
+![QS](./Images/QS.png )  
+只有这几十行是我在工程中的编码，剩下的大致看了一下，应该是根据import的内容将对应的库写进了文件。
+
+#### 2.初始化组件模块
+
+没有太多值得关注的内容，想要自定义的原生组件与JS交互需要`RCT_EXPORT_MODULE`宏标记组件暴露给JS的名字，官方定义的组件同样是以这个宏标记，之后的事情就是用一个for循环遍历所有组件，并将其加入配置信息：  
+```objectivec
+  for (id<RCTBridgeModule> module in extraModules) {
+    Class moduleClass = [module class];
+    NSString *moduleName = RCTBridgeModuleNameForClass(moduleClass);
+
+    RCTModuleData *moduleData = [[RCTModuleData alloc] initWithModuleInstance:module
+                                                                       bridge:self];
+    moduleDataByName[moduleName] = moduleData;
+    [moduleClassesByID addObject:moduleClass];
+    [moduleDataByID addObject:moduleData];
+  }
 ```
