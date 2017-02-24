@@ -112,7 +112,7 @@ AppRegistry.registerComponent('Communication', () => Communication);
       });
     }
 ```
-注释很清晰易懂，这里加载的是资源代码，那到底是什么资源代码呢？包含哪些内容呢？我们设置一个断点，然后看一下显示：
+注释很清晰易懂，这里加载的是资源代码，那到底是什么资源代码呢？包含哪些内容呢？我们设置一个断点，然后看一下显示：  
 ![sourceCode](./Images/sourceCode.png)  
 可以看到这是一个1.2M的文件，具体内容好像包含很多相关代码，看起来很像JS，但是这么个格式看肯定吐血啊。那么，这时候就可以借助开源的力量，改一下start函数的代码，把这个Data保存到一个文件中，因为看着代码很像JS，我改了JS后缀，配合IDE的着色能更清晰的分析，内容如下：  
 ![dataImage](./Images/dataImage.png)  
