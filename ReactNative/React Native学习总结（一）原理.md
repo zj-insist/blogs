@@ -94,11 +94,11 @@ AppRegistry.registerComponent('Communication', () => Communication);
 ```  
 
 然后进入rootView的init函数，看到这个bridge作为两个通知的监听对象，它是OC和JS之间的桥梁，整个应用中OC和JS的交互都是依赖这个对象。继续追踪bridge的初始化流程，发现在`setup`中创建了一个BatchedBridge对象，并执行了这个对象的start方法。在这个start函数中，有清晰的官方注释告诉我们这个函数做了哪些工作，包括以下5件事情：
-1. 加载资源代码
-2. 初始化组件模块
-3. 初始化JSExecutor
-4. 搜集模块的配置信息
-5. 执行JavaScript源码
+1. 加载资源代码  
+2. 初始化组件模块  
+3. 初始化JSExecutor  
+4. 搜集模块的配置信息  
+5. 执行JavaScript源码  
 
 #### 1.加载资源
 
