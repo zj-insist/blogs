@@ -5,8 +5,8 @@
 2. iOS平台下，React Native是如何工作
 3. 学习JavaScript ES6标准
 4. 搭建开发环境以及配置环境的一些坑
-5. IDE工作环境配置以及DeBug工具使用
-6. 使用RN构建Demo的一些体会
+5. 使用RN构建Demo的一些体会
+6. IDE工作环境配置
 
 ## **1.关于React Native**
 
