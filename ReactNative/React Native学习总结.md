@@ -286,3 +286,16 @@ config中包含了所有libraries中的Manager类，甚至包括了我们自定�
 
 最后，贴一张网上看到的图梳理整个初始化流程：  
 ![JSTOOC](./Images/JSTOOC.png ) 
+  
+### 参考
+[React Native 从入门到原理](http://www.jianshu.com/p/978c4bd3a759)  
+
+
+[谈谈我对 ReactNative 的看法](https://zhuanlan.zhihu.com/p/20549882)  
+
+
+[使用 React Native 来撰写跨平台的 App](http://www.infoq.com/cn/articles/react-native-introduction)  
+
+[React Native 通信机制详解](http://blog.cnbang.net/tech/2698/)  
+
+[React Native](http://facebook.github.io/react-native/releases/0.40/docs/getting-started.html)
