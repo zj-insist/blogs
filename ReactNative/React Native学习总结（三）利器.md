@@ -53,7 +53,9 @@
 ```
 
 #### [Dash](https://marketplace.visualstudio.com/items?itemName=deerawan.vscode-dash)  
->Dash就不多介绍了，用过都知道，这个插件的功能是可以实现在VSCode中选中后的一键查询，相当方便。  
+```
+Dash就不多介绍了，用过都知道，这个插件的功能是可以实现在VSCode中选中后的一键查询，相当方便。  
+```
 
 #### [Document This](https://marketplace.visualstudio.com/items?itemName=joelday.docthis)  
 ```
