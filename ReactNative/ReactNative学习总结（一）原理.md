@@ -292,4 +292,7 @@ config中包含了所有libraries中的Manager类，甚至包括了我们自定�
 
 [React Native 通信机制详解](http://blog.cnbang.net/tech/2698/)  
 
-[React Native](http://facebook.github.io/react-native/releases/0.40/docs/getting-started.html)
+[React Native](http://facebook.github.io/react-native/releases/0.40/docs/getting-started.html)  
+
+## 相关链接
+[ReactNative学习总结（三）原理](./ReactNative学习总结（三）利器.md)
