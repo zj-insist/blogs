@@ -1,4 +1,11 @@
-# React Native入门总结 （一）原理
+<!--
+author: 青山-郑杰 
+date: 2017-2-24 
+title: ReactNative入门总结（一）原理 
+tags: ReactNative
+category: ReactNative
+status: publish 
+-->
 
 最近三周，从零开始学习当前较为火热的React Native技术，使用RN在iOS平台完成一些小Demo和一个静态的商品详情页。整体来说，对于一个没有任何前端开发经验的Native程序员来，RN的学习曲线还是相当陡峭。不仅要接触学习RN框架，还要掌握JS的语言特性和相关机制，而JS的编程习惯和一些规范，和此前理解的OO编程思想还是有相当大差异。此外，一项新兴的技术，其相关参考资料和案例都是很少。再加上RN版本也在快速迭代中，可能仅仅三个月前的Demo，在当前版本就已经不能运行。因此，整个过程中还是踩了相当多的坑。当然，踩得坑多了，还是有些收获。整体的入门线路分为以下几个方面：   
 1. 什么是React Native
@@ -182,7 +189,7 @@ void RCTRegisterModule(Class moduleClass)
 }
 ```
 
-这个宏返回原生的组件在JS中的名字，然后在load方法中调用注册方法，把这个类加入RCTModuleClasses，之后的事情就是用一个for循环遍历RCTModuleClasses，将其中的所有类都加入配置信息：  
+这个宏返回原生的组件在JS中的名字，然后在load方法中调用注册方法，把这个类加入RCTModuleClasses，之后的事情就是用一个for循环遍历 RCTModuleClasses，将其中的所有类都加入配置信息：  
 
 ```objectivec
 for (Class moduleClass in RCTGetModuleClasses()) {
