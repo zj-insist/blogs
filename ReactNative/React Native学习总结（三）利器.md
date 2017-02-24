@@ -27,7 +27,7 @@
 
 言归正传，要开发RN，那么首先要配置的肯定就是RN环境，具体操作这篇文章中都有详细介绍：  
 #### [环境配置：React Native 智能开发工具，可代码提醒的 IDE—VS Code](http://mp.weixin.qq.com/s?__biz=MjM5NDkxMTgyNw==&mid=2653058224&idx=1&sn=553b4ce24b22680d8f46cba082eb8661&scene=0#wechat_redirect)  
-文章中的自动提醒好像已经集成到IDE中，所以不需要过多配置。之后，就是配置IDE将JS文件都默认为RN文件打开。打开首选项->设置，搜索`files.associations`，并编辑此内容如下：  
+文章中的自动提醒好像已经集成到IDE中，所以不需要过多配置，如果发现没有支持RN的自动补全，可以搜索`VSCode RN开发环境配置`，根据教程调整。之后，就是配置IDE将JS文件都默认为RN文件打开。打开首选项->设置，搜索`files.associations`，并编辑此内容如下：  
 ```
 "files.associations": {
     "*.js": "javascriptreact"
@@ -43,41 +43,41 @@
 
 最后是插件，这个东西就很看个人习惯和喜好了，我只列出我当前使用的一部分。  
 #### [Auto Rename Tag](https://marketplace.visualstudio.com/items?itemName=formulahendry.auto-rename-tag)  
-该插件提供了自动匹配对应标签的功能，当你修改一个标签时，另一个标签会自动更改，和`EditAll`功能类似。  
+>该插件提供了自动匹配对应标签的功能，当你修改一个标签时，另一个标签会自动更改，和`EditAll`功能类似。  
 
 #### [background](https://marketplace.visualstudio.com/items?itemName=shalldie.background)  
-完全是个人喜好…撸代码时候可以配置几张背景图减缓视觉压力，需要根据说明稍微设置一下。  
+>完全是个人喜好…撸代码时候可以配置几张背景图减缓视觉压力，需要根据说明稍微设置一下。  
 
 #### [Dash](https://marketplace.visualstudio.com/items?itemName=deerawan.vscode-dash)  
-Dash就不多介绍了，用过都知道，这个插件的功能是可以实现在VSCode中选中后的一键查询，相当方便。  
+>Dash就不多介绍了，用过都知道，这个插件的功能是可以实现在VSCode中选中后的一键查询，相当方便。  
 
 #### [Document This](https://marketplace.visualstudio.com/items?itemName=joelday.docthis)  
-一键生成注释  
+>一键生成注释  
 
 #### [Guides](https://marketplace.visualstudio.com/items?itemName=spywhere.guides)  
-虽然VSCode中可以格式化代码，但很多时候标签的对其还是很难辨认，老年人眼花就加条线吧。  
+>虽然VSCode中可以格式化代码，但很多时候标签的对其还是很难辨认，老年人眼花就加条线吧。  
 
 #### [Path Autocomplete](https://marketplace.visualstudio.com/items?itemName=ionutvmi.path-autocomplete)  
-自动补全文件路径  
+>自动补全文件路径  
 
 #### [Project Manager](https://marketplace.visualstudio.com/items?itemName=alefragnani.project-manager)   
-管理项目，感觉VSCode的文件打开不够友好，这个可以帮助管理工程  
+>管理项目，感觉VSCode的文件打开不够友好，这个可以帮助管理工程  
 
 #### [PReact Native Tools](https://marketplace.visualstudio.com/items?itemName=vsmobile.vscode-react-native)    
-没什么说的，RN开发必要装
+>没什么说的，RN开发必要装
 
 #### [vscode-icons](https://marketplace.visualstudio.com/items?itemName=robertohuertasm.vscode-icons)   
-没什么实际卵用，但是安装量已经是百万级别的插件，优化VSCode的图标显示，看着舒服才有心情撸代码…  
+>没什么实际卵用，但是安装量已经是百万级别的插件，优化VSCode的图标显示，看着舒服才有心情撸代码…  
 
 #### [vscode-todo](https://marketplace.visualstudio.com/items?itemName=MattiasPernhult.vscode-todo)  
-可以直接列出代码中所有TODO的位置  
+>可以直接列出项目中所有TODO的位置，但是感觉好像有点小Bug，选择语言后会覆盖RN的智能提醒  
 
 #### [WakaTime](https://marketplace.visualstudio.com/items?itemName=WakaTime.vscode-wakatime)   
-个人使用的一款工作记录软件，有兴趣的可以了解一下WakaTime  
+>个人使用的一款工作记录软件，有兴趣的可以了解一下WakaTime  
 
 
 #### **各式各样的补全以及语言支持插件**  
-这个就要根据个人的开发自行搜索了  
+>这个就要根据个人的开发自行搜索了  
 
 
 最后，帖上一篇介绍VSCode的配置和快捷键的文章：  
