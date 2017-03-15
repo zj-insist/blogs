@@ -247,7 +247,7 @@ export default class ReduxTest extends Component {
 
 ![Counter](./Images/counter.gif)  
 
-Demo源码可以点击[这里]()。  
+Demo源码可以点击[这里](https://github.com/zj-insist/Redux-Counter-Demo)。  
 
 ### Redux 实践  
 
@@ -255,7 +255,7 @@ Demo源码可以点击[这里]()。
 
 刚接触时候，我也被以上的各种流程绕来绕去云里雾里，觉得这是一个很复杂的使用流程，还不如使用正常的逻辑回调，这也是为什么很多介绍 redux 的文章在开篇都会放上一片[《You Might Not Need Redux》](https://medium.com/@dan_abramov/you-might-not-need-redux-be46360cf367#.7cq7nr1z2)的原因。直到我实现单选功能时候，遇到各种难以解决的问题时候，使用了 redux 才发现，这个解决方案在复杂的业务流程中的能量。  
 
-以下，将从一个双列表的实现分析 redux 在复杂业务流程的作用，具体的源码可以点击[这里]()。  
+以下，将从一个双列表的实现分析 redux 在复杂业务流程的作用，具体的源码可以点击[这里](https://github.com/zj-insist/Redux-Double-Demo/tree/master)。  
 
 首先上张效果图:  
 
