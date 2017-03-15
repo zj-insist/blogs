@@ -245,7 +245,7 @@ export default class ReduxTest extends Component {
 
 至此，便是 react-redux 使用的基本流程，具体效果如下图：  
 
-![Counter](./Images/Counter.gif)  
+![Counter](./Images/counter.gif)  
 
 Demo源码可以点击[这里]()。  
 
