@@ -19,7 +19,7 @@ Group 样式
 
 两个 table 的高度都为除掉Nav的整个屏幕大小，除了添加了一个为了便于区分起始位置的10个点高的 tableViewHeader，没有做过其他处理。可以看到，两种样式，系统都会在 cell 分隔线的头部位置给15个点的缩进，Plain 样式下，如果 cell 数量可以在一屏全部显示而且屏幕空间有空余，系统会默认显示屏幕内还能容纳多少 cell，如果整个屏幕没有内容，table 也会像笔记本一样显示每行的分隔线，从 View UI Hierarchy 也可以看到，多出来的空间并没有创建空白 cell，只是显示了 cell 相应的分隔线。除此之外，Plain 样式没有对 table 进行特殊处理。添加一个空白的 footerView 可以删除多余的分隔线：  
 
-```objc
+```objc  
 self.tableView.tableFooterView = [[UIView alloc] init];
 ```  
 
@@ -73,7 +73,7 @@ if (indexPath.row == 0) {
 
 在添加 header 或者 footer 后，与其相邻的 cell 的分隔线会被替换掉。那么问题就简单了，在使用 header 作为分隔时，由于最后一个 section 的最后一个 cell 是没有相邻 header，因此分隔线会被保留，所以，使用 footer 作为间隔可以达到我们预期的效果。至此，已经完成了大部分的视觉效果，还剩下一个去除 header 或者 footer 粘滞性的效果，很简单，通过重载以下函数便可以完成：  
 
-```objc
+```objc  
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView{
     /** 修改成自己的组头高度就可以了 */
     CGFloat sectionHeight = self.height;
