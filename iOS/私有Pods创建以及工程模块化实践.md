@@ -1,10 +1,10 @@
 # 私有Pods创建以工程模块化实践  
 
-最近，项目中需要做一个独立性的基础模块，目的是要配置成第三方库类似的使用模式，没有业务依赖，但是引用便捷。当前，iOS开发中通常都是使用CocoaPods维护项目中的第三方库，之前也曾接触过使用Pods管理项目子模块的项目，但当时对CocoaPods都是似懂非懂，没有深入的研究。现在刚好借助这个机会了解Pods的整个运行机制。  
+最近，项目中需要做一个独立性的基础模块，目的是要配置成第三方库类似的使用模式，没有业务依赖，但是引用便捷。当前，iOS开发中通常都是使用CocoaPods维护项目中的第三方库，之前也曾接触过使用Pods管理项目子模块的项目，但当时对CocoaPods都是似懂非懂，也没有深入的研究。现在刚好借助这个机会了解Pods的整个运行机制。  
 
 ## 私有Pods创建以及维护  
 
-私有库的创建CocoaPods的官网有相当明确的文档，网上也有相当多的博客整理，总结之后大致可以分为以下几个步骤：  
+创建私有pods，CocoaPods的官网有相当明确的文档，网上也有很多的博客整理，总结之后大致可以分为以下几个步骤：  
 
 1.创建与添加私有Specs Repo  
 2.创建私有Pods工程文件  
@@ -69,21 +69,21 @@ XGTCPrivatePodsRepo
 
 截去master中过长的内容，可以看到其中主要包含每个repo中包含的库和其对应版本的配置文件。由于在安装pods的时候我们便已经将master clone到本地，因此我们可以对pods中支持的库进行常规的pods操作。那么要建立私有库的步骤就很明显了：创建自己的repo->clone这个repo->添加私有库的配置文件到这个repo。这样，就能像操作常规的第三方库一样操作我们自己创建的私有库了。  
 
-创建自己的repo首先需要一个git仓库，如何创建根据自身需求，这里作为例子使用GitHub；然后添加这个仓库为repo，使用如下命令：  
+创建自己的repo首先需要一个git仓库，如何创建根据自身需求，这里作为例子使用GitHub；创建完成后clone这个repo到本地，使用如下命令：  
 
 ```zsh  
   # pod repo add [Private Repo Name] [GitHub HTTPS clone URL]
   ➜ pod repo add QSPrivateRepo https://github.com/zj-insist/PrivatePodsRepo.git
 ```  
 
-repo的名称并不需要跟git仓库中的一样，可以使用自定义名称。repo仓库并不需要所有项目的参与者都在本地添加，其主要作用是为了更新私有库的版本号以供使用者更新。如果只有一个人维护其中私有库版本，则只需维护者添加这个repo，参与这个repo的push工作，使用者只需在podfile中进行相关配置便可正常使用。  
+repo的名称并不需要跟git仓库中的一样，可以使用自定义名称。repo仓库并不需要所有项目的参与者都在本地添加，其主要作用是为了更新私有库的版本号以供使用者更新。如果只有一个人维护私有库版本，则只需维护者添加这个repo，参与这个repo的push工作，使用者只需在podfile中进行相关配置便可正常使用。  
 
 
 #### 2. 创建私有Pods工程文件  
 
 这一步，最简单的方法便是创建一个文件夹，然后把工程文件放入这个文件夹，最后，创建一个远程git仓库，管理这个工程。至此，便完成了第二步。  
 
-此外，pods中也集成了创建pods项目的命令，并帮助我们完成了相关配置文件以及example工程的创建。切换目录到要创建工程的文件夹，然后运行如下命令：  
+此外，pods中也集成了创建pods项目的命令，并帮助我们完成相关配置文件以及example工程的创建。切换目录到要创建工程的文件夹，然后运行如下命令：  
 
 ```zsh   
  # pod lib create [Private Pods Name]
@@ -131,9 +131,9 @@ What is your class prefix?
 └── _Pods.xcodeproj -> Example/Pods/Pods.xcodeproj
 ```   
 
-由于我在创建中选择生成example工程，系统为我创建了一个Demo工程，此外需要关注的便是QSPrivatePodsLibrary文件夹，以及QSPrivatePodsLibrary.podspec文件。前者是我们私有库的库文件包括代码文件以及资源文件，除了系统自动生成的文件夹，我们可以根据自身需求创建文件夹；而后者则是重点需要关注的pods的索引配置文件，pods的工作都是依赖这个文件，具体内容会在下一节讲到。  
+由于我在创建中选择生成example工程，系统为我创建了一个Demo工程，此外需要额外关注的是QSPrivatePodsLibrary文件夹，以及QSPrivatePodsLibrary.podspec文件。前者是私有库的库文件，包括代码文件以及资源文件，除了系统自动生成的文件夹，我们可以根据自身需求创建文件夹；而后者则是CocoaPods配置文件，pods的工作都是依赖这个文件，具体内容会在下一节介绍。  
 
-最后，额外的关注一下Example工程的Podfile文件，内容如下：  
+最后，额外关注一下Example工程的Podfile文件，内容如下：  
 
 ```ruby  
 use_frameworks!
@@ -147,12 +147,13 @@ target 'QSPrivatePodsLibrary_Example' do
 end
 ```  
 
-然后再看一下在Xcode工程下的目录结构：  
+再看一下在Xcode工程下的目录结构：  
 ![目录结构](./Images/private-pods-file-tree.png)  
 
 因为在Podfile中使用本地路径引入的第三方库，所以第三方库以Development Pods的形式引入项目，两者的主要区别是Development Pods中的代码是可以更改的，而Pods中的内容更改是被锁定的。根据命名和特性也很明显，Development Pods主要用于第三方或私有库的开发，Pods则主要是管理第三方库。  
 
-创建好目录和私有库必要的文件，编写好私有库功能，然后将私有库中的文件推送到git，这个git便是要在podsepc文件中配置的第三方库的项目地址；此外，还要给项目添加一个tag，用于标示私有库的版本，这个tag需要和podspec中配置的version对应。CocoaPod在管理私有库时，会根据podsepc文件中的version获取项目对应tag位置的版本，以此达到版本控制的目的。如果在podspec中配置的版本在项目中没有对应的tag，则podspec文件的验证会无法通过。  
+创建好目录和私有库必要的文件，编写好私有库功能，然后将私有库中的文件推送到git；此外，还要给项目添加一个tag，用于标示私有库的版本，这个tag需要和podspec中配置的version对应。CocoaPod在管理私有库时，会根据podsepc文件中的version获取项目对应tag的版本，以此达到版本控制的目的。如果在podspec中配置的版本在项目中没有对应的tag，则podspec文件的验证会无法通过。  
+
 简单来说，修改私有库上传git后，需要给这个上传的版本打上一个tag，同步的，要更新这个私有库中podsepc文件中的version为这个tag的值。    
 
 #### 3. 配置Podspec文件  
@@ -163,7 +164,7 @@ end
 pod spec create [PodsName] [GitHub HTTPS clone URL]
 ```  
 
-其中Name便是使用中私有库或者第三方库的名字，GitHub中的内容为选填，此处输入一个私有库的git地址，CocoaPods会自动将项目中的部分信息填充到需要配置的podspec文件，使用命令生成模板文件：  
+PodsName为私有库名称，GitHub中的内容选填可不填，也可输入一个项目地址，CocoaPods会自动将项目中的部分信息填充到podspec文件，使用如下命令生成模板文件：  
 
 ```zsh
 pod spec create test https://github.com/zj-insist/QSPrivatePodsLibrary.git
@@ -225,7 +226,7 @@ pod spec lint --allow-warnings
 #pod lib lint --allow-warnings  
 ```  
 
-`--allow-warnings`参数可有可无，但是验证的标准似乎比较严格，很多对项目毫无影响的问题也会造成验证不通过，如果没有对项目有影响的警告信息，建议可以使用该参数通过验证。验证通过后，会有如下提示信息：  
+`--allow-warnings`参数可有可无，但是验证的标准似乎比较严格，很多对项目毫无影响的问题也会造成验证不通过，如果没有对项目有影响的警告信息，建议使用该参数通过验证。通过后，会有如下提示信息：  
 
 ```zsh
  -> QSTestPodsLibrary (0.1.1)
@@ -241,7 +242,7 @@ QSTestPodsLibrary.podspec passed validation.
 
 #### 4. 共享私有库
 
-完成私有库的创建后，便要实现私有库的共享。这时，便要使用在第一步创建的私有repo，这个repo便是存储私有库信息的仓库，在命令行推送已经通过验证的podspec文件到repo：  
+完成私有库的创建后，要实现私有库的共享。这时，需要使用第一步创建的私有repo，这个repo就是存储我们创建的私有库配置文件的仓库，在命令行推送已经通过验证的podspec文件到repo：  
 
 ```zsh
 pod repo push [Location RepoName] [Podspec Name] --allow-warnings
@@ -249,7 +250,7 @@ pod repo push [Location RepoName] [Podspec Name] --allow-warnings
 
 这里需要注意的是，push的repo名字是在本地创建的名字，pod会从本地的名字索引git地址，如果此处名字和本地不匹配，则推送不成功，这也是管理私有repo需要把这个repo clone到本地的原因。添加`--allow-warnings`参数的原因和验证时一致，此处不赘述。  
 
-推送成功后，便可以在添加过包含这个私有库的repo中使用pods的查询操作查询这个库：  
+推送成功后，可以在添加过包含这个私有库的repo中使用pods的查询操作查询这个库：  
 
 ```zsh
 QSPrivatePodsLibrary git:(master) pod repo push QSPrivateRepo QSTestPodsLibrary.podspec
@@ -291,7 +292,7 @@ source 'https://github.com/zj-insist/PrivatePodsRepo.git'
 2. 在本地验证更新后的podspec文件
 3. 将验证通过后的podspec文件上传私有repo  
 
-删除一私有库不需要借助CocoaPods，只需要像操作普通的工程一样，切换到要删除的私有库目录，然后删除这个私有库的目录及内部配置文件，最后更新这个私有库的改动，这样就完成了私有库的删除工作。当然，这个操作只是删除了私有库在repo中的配置信息，并没有对私有库的内容做改动，想添加回来再次push私有库的podspec文件到私有repo即可。  
+删除私有库不需要借助CocoaPods，只需要像操作普通git工程一样，切换到要删除的私有库目录，然后删除这个私有库的目录及内部配置文件，最后更新这个私有库的改动到远端，这样就完成了私有库的删除工作。当然，这个操作只是删除了私有库在repo中的配置信息，并没有对私有库的内容做改动，想添加回来只需再次push私有库的podspec文件到私有repo即可。  
 
 第一部分只介绍了创建一个私有库的基本操作，还有比如使用子模块、创建framework以及静态库等技巧，有兴趣的可以更深入的了解一下。  
 
@@ -301,9 +302,9 @@ source 'https://github.com/zj-insist/PrivatePodsRepo.git'
 
 1.tag移动对私有库的影响   
 
-可能是对tag的理解不够深入，导致了一系列奇怪的问题，因为我使用sourceTree这种GUI的git管理工具，每次移动标签都会报标签已存在的错误，所以有些问题也不能确保就是移动标签造成的，很可能是我的标签没有移动到正确的位置。  
+可能是对tag的理解不够深入，导致了一系列奇怪的问题，因为我使用sourceTree这种GUI的git管理工具，每次移动标签都会报标签已存在的错误，所以有些问题也不能确保就是移动标签造成的，很可能是我的标签没有移动到正确的位置…  
 
-首先，一个比较明显的问题，发布一个新版本后，不可以通过修改tag的位置更新私有库的内容。简单来说，发版后，这个tag就没卵用了，即使我这时候删除这个tag，私有库依然可以正常被引用。结合验证时需要项目中存在与version对应的tag号，否则不能通过验证分析，猜测CocoaPods内部存储了这个tag对应的commit编号，在上传完成后，这个编号固定，我们修改或者删除tag并不会对这个编号造成影响。tag只是对外的一种标示，真正使用的是commit编号。但是，我并没有在私有repo中找到存储commit编号的记录，所以以上为不负责猜测，有时间可以研究一下CocoaPods的实现。     
+首先，一个比较明显的问题是，发布一个新版本后，不可以通过修改tag的位置更新私有库的内容。简单来说，发版后，这个tag就没卵用了，即使我这时候删除这个tag，私有库依然可以正常被引用。结合验证时需要项目中存在与version对应的tag号，否则不能通过验证分析，猜测CocoaPods内部存储了这个tag对应的commit编号，在上传完成后，这个编号固定，我们修改或者删除tag并不会对这个编号造成影响。tag只是对外的一种标示，真正使用的是commit编号。但是，我并没有在私有repo中找到存储commit编号的记录，所以以上为不负责猜测，有时间可以研究一下CocoaPods的实现。     
 
 之后，还有一个出现过一次的问题，具体是，我把tag打在了commit编号为A的位置，然后验证podsepc发现有问题不通过，于是修改私有库再提交，这个commit编号为B。这时我不想重新打个tag，就把tag移动到B，之后提交验证，而这个时候验证的报错是我已经修改过的问题，就是验证的还是A位置的记录。具体原因不明，但是更新tag号可以解决这个问题，估计问题还是跟CocoaPods匹配tag和version的内部实现有关系。  
 
