@@ -1,6 +1,6 @@
 # 《Effective Objective-C 2.0》读书笔记  
 
-1. 尽可能不在头文件中引入其他头文件  
+## 1. 尽可能不在头文件中引入其他头文件  
 
 - 编译其间，头文件并不关心引入文件的内部实现，此时可以使用 `@class someClass` 的`向前声明`的方式通过编译。因为引入头文件后编译器就会把相应的头文件复制到引用的文件内，而向前声明的方式省略了这一步，可以减少部分编译时间；此外，这种方式也可以有效避免两个文件的循环引用导致编译不通过，以及文件间的耦合。  
 
@@ -8,35 +8,36 @@
 
 ---   
 
-2. 尽可能多的使用字面量语法创建OC对象  
+## 2. 尽可能多的使用字面量语法创建OC对象  
 
 - 多使用如下中字面量的方式代替方法的方式创建OC对象，这样做的目的是可以让代码简洁，字面量的方式也不过是OC的语法糖，方便创建对象的一种写法，实际还是需要调用方法，用这种方式创建时，如果对象中包含nil会直接报错，方便定位，当然，不便之处在于不可变类型的对象不能用这种方式创建，解决方式也很简单，拷贝一份此类对象的可变副本即可
 
-```objc
-    //字面量
-    NSString *strValue = @"我是一个字符串";
-    //方法创建
-    NSString *strMethod = [NSString stringWithFormat:@"我也是一个字符串"];
-    //字面量
-    NSNumber *numValue = @1;
-    //方法创建
-    NSNumber *numMethod = [NSNumber numberWithInteger:1];
-    //字面量
-    NSArray *arrValue = @[@"1",@"2"];
-    //方法创建
-    NSArray *arrMethod = [NSArray arrayWithObjects:@"1", @"2", nil];
-    //字面量
-    
-    NSDictionary *dicValue = @{@"key1":@"value1",
-                               @"key2":@"value2"};  
-    //方法创建
-    NSDictionary *dicMethod = [NSDictionary dictionaryWithObjectsAndKeys:@"value1", @"key1", @"value2", @"key2", nil];
-```
+    ```objc
+        //字面量
+        NSString *strValue = @"我是一个字符串";
+        //方法创建
+        NSString *strMethod = [NSString stringWithFormat:@"我也是一个字符串"];
+        //字面量
+        NSNumber *numValue = @1;
+        //方法创建
+        NSNumber *numMethod = [NSNumber numberWithInteger:1];
+        //字面量
+        NSArray *arrValue = @[@"1",@"2"];
+        //方法创建
+        NSArray *arrMethod = [NSArray arrayWithObjects:@"1", @"2", nil];
+        //字面量
+        
+        NSDictionary *dicValue = @{@"key1":@"value1",
+                                @"key2":@"value2"};  
+        //方法创建
+        NSDictionary *dicMethod = [NSDictionary dictionaryWithObjectsAndKeys:@"value1", @"key1", @"value2", @"key2", nil];
+    ```   
+
 - 多使用下标的方式访问数组或者字典，原理和对象的创建一样，可以让代码看起来更简单易懂，而不是包含大量方法名   
 
 ---
 
-3. 多用常量代替预处理指令#define  
+## 3. 多用常量代替预处理指令#define  
 
 - #define只是一个简单的替换处理，而常量可以显示比如类型等更多的信息，而且使用const关键字可以防止使用过程中被修改  
 
@@ -46,7 +47,7 @@
 
 ---  
 
-4. 使用枚举表示状态相关内容  
+## 4. 使用枚举表示状态相关内容  
 
 - 使用枚举代替int、string等值代表的状态码，可以让程序更加通俗易懂，此外应该尽量使用系统定义的NS_ENUM类型或者NS_OPTION宏定义来定义枚举，这样可以自己定义枚举的类型  
 
@@ -54,7 +55,7 @@
 
 ---  
 
-5. 在对象内部尽量直接访问实例变量  
+## 5. 在对象内部尽量直接访问实例变量  
 
 - 通过实例变量访问不会调用setter和getter方法，不经过消息转发，拥有更高的效率  
 
@@ -70,6 +71,83 @@
 
 ---  
 
-6. “对象等同性”概念  
+## 6. “对象等同性”概念  
 
-- 
+- 对象的对等，使用 `==` 对比的是两个对象的指针是否相当，结果并不一定是正确的结果，比如对比通过不同方式初始化的两个内容相等的字符串， `==` 的结果是不同的，而我们一般会期望相同。判断两个对象的对等关系，一般需要使用 `NSObject` 类中的 "`isEqual`" 方法对比  
+
+- `NSObject` 协议用于判断对象相等的是以下两个方法：  
+
+    ```objC
+        - (BOOL)isEqual:(id)object;
+        - (NSUInteger)hash;
+    ```   
+    两个方法的默认实现都是当且仅当内存地址相同时才返回两个对象相等。对象遵守 `NSObject` 协议我们便可以根据自己的需求实现判断两个对象对等的规则。比如，两个对象的属性都对等时我们便认为两个对象相等，而不需要两个对象的指针相同。以下是一个简单的实现：  
+
+    ```objC   
+        //.h
+        @interface Person : NSObject   
+        @property(nonatomic, copy) NSString *firstName;
+        @property(nonatomic, copy) NSString *lastName;
+        @property(nonatomic, assign) NSInteger age;
+        @end
+        
+        //.m
+        @implementation Person
+        //isEqual
+        - (BOOL)isEqual:(id)object {
+        if (self == object) return YES;
+        if ([self class] != [object class]) return NO;
+        
+        Person *tempPerson = (Person *)object;
+        if (tempPerson.firstName != _firstName) return NO;
+        if (tempPerson.lastName != _lastName) return NO;
+        if (tempPerson.age != _age) return NO;
+        return YES;
+        }
+
+        //hash
+        - (NSUInteger)hash {
+            return [_firstName hash] ^ [_lastName hash] ^ _age;
+        }
+
+        @end
+
+    ```   
+
+    `hash` 函数可以有很多种实现，甚至可以返回一个固定的值，它对两个对象相当的判断只起到一个辅助作用，相等的对象一定返回相同的 hash 值，而 hash 值相同的对象却不一定相等。其主要作用是在对象被添加到集合时，可以有较高的存取效率，如果返回一个固定的值，操作容器中的对象则每次都要去遍历整个碰撞后的链表，效率极其低下。所以，实现 hash 函数需要寻求一个碰撞少的算法，而 hash 值的生成也应该简单高效。  
+
+- 如果需要频繁的调用对等性的判断，还是建议自己创建对等性方法而不是重写 `isEqual` 方法，一方面是减少了类型判断提升效率，一方面又能保障代码逻辑和结构的清晰  
+
+- 集合类型也有等价判断方法，`isEqualToArray`, `isEqualToDictionary` 分别对应数组和字典的想等下判断，方法默认会首先判断对应位置的对象是否相等，如果相等，则调用 `isEqual` 判断两个对象是否相等，知道判断所有位置的对象相等才会返回两个集合相等。集合的相等涉及同等性深度的一个问题，如果判断两个集合并不需要所有位置的对象都完全相等，则可以自定义对等方法判断来提高对等性判断的效率   
+
+- 如果可变类型对象添加入容器则可能导致修改后的对象被放入"`错误`"的位置，比如在一个 NSSet 中添加两个可变数组，之后再改变一个数组和另一个数组相同，这样 NSSet 中就出现了两个相同的元素，这很明显是不合理的，因此在添加可变对象到容器中时要格外小心，另一方面，对象添加入容器是根据 `hash` 值决定位置的，所以，生成 `hash` 值时应尽量使用不可变部分  
+
+## 7. 类簇  
+
+- 使用类簇配合工厂方法可以把各种个性化的实现细节隐藏到一系列公共接口之后  
+
+- 类簇中某一个子类对象的实例的类型和类簇的类型是不一样的  
+
+## 8. 关联对象  
+
+- 可以使用运行时的关联相关方法，在运行时给一个对象动态的绑定属性相应的记录信息已达到某些情况下代码更加聚合的目的  
+
+- 关联对象方法需要慎用，因为相关方法是在运行时添加的，很难通过常规的 DeBug 手段发现出现的问题  
+
+## 9. 关于 obj_msgSend  
+
+- 理解OC与C之类静态语言的区别主要是理解动态绑定和静态绑定的区别，简单理解是程序执行过程中需要调用的函数是在编译器就已经决定了的还是运行过程中才能决定   
+
+- obj_msgSend 会维护一个快速访问方法列表，每次有方法调用都会更新这个列表保障方法的检索速度  
+
+- 在一些边界情况下，OC运行环境会调用一下函数做特殊处理：  
+
+    - obj_msgSend_stret: 处理调用函数返回结构体的问题  
+    - obj_msgSend_fpret: 处理调用函数返回浮点数的情况，因为在不同架构的CPU上，浮点数存在差异  
+    - obj_msgSendSuper: 处理发送给超类的消息  
+
+- obj_msgSend 使用"`尾调用优化`"的技术使调用函数的跳转变得更简单  
+
+
+
+
