@@ -166,7 +166,7 @@
 
     消息在每一步都可能会被处理，但是越往后处理的代价越大，需要处理的内容也越多，因此如果可以应该在尽可能早的处理消息  
 
-    消息转发可以参考[这个例子](https://github.com/zj-insist/EffectiveObjCDemo)内的 EOCAutoDictionary 中的内容  
+    消息转发可以参考 [Demo](https://github.com/zj-insist/EffectiveObjCDemo) 项目 `EOCAutoDictionary` 中的内容  
 
 ### 11 .方法调和(Method Swizzing)  
 
@@ -219,7 +219,7 @@
 
 - 特定情况下，需要不止一个“`指定初始化方法`”   
 
-- “`指定初始化方法`”还有很多需要注意的内容，具体可以参考[这里](http://www.cnblogs.com/smileEvday/p/designated_initializer.html)，相关实例代码，可以参考[项目](https://github.com/zj-insist/EffectiveObjCDemo) `Designated` 中的内容   
+- “`指定初始化方法`”还有很多需要注意的内容，具体可以参考[这里](http://www.cnblogs.com/smileEvday/p/designated_initializer.html)，相关实例代码，可以参考 [Demo](https://github.com/zj-insist/EffectiveObjCDemo) 项目`Designated` 中的内容   
 
 ### 15. 尽量使用不可变对象  
 
@@ -256,7 +256,105 @@
 
 - 如果仅仅需要使用浅拷贝不要深拷贝对象，浅拷贝效率远高于深拷贝  
 
+## 协议与分类  
 
+### 18. 数据源与委托  
+
+- 关于 `dataSource` 和 `Delegate`，两者的区别是数据流向的不同，一句话概括，数据源代理的信息是从代理流向类，委托的信息是从类流向代理对象。以 UITableView 相关的数据源和代理举例，有返回值的委托方法是数据源方法，没有返回值的委托方法便是普通代理方法，当前 VC 作为 UITableView 数据源，提供返回值便是提供了信息流向， UITableView 根据返回的值决定渲染的数量以及各种信息；同时，当前 VC 也作为 UITableView 的委托对象，当 UITableView 发生用户交互事件时， UITableView 中的交互信息便流向了委托对象，由委托对象决定怎么处理这些信息。下图反映了两者的异同和信息流向：  
+
+    ![数据源和代理](./Images/delegate.jpg)   
+
+- 因为在程序运行过程中,只要委托对象没有变化，对于一个选择子的响应状态是相对固定的，不可能突然和可以响应或者不能响应，因此可以在设置代理时存储选择子的调用状态，这样就不用频繁的调用 `respondsToSelector` 方法去检查能否调用。使用一个结构体可以很好的表述代理方法的响应情况。由于响应状态只可能存在两种情况，因此，使用一位就可以表示，使用 `位段` 的方式可以更加优化这个表述，示例代码如下：  
+
+    ```objc
+        //.h
+        @protocol PreferDelegate
+        @optional
+        - (void)delegateMethodA;
+        - (void)delegateMethodB;
+        - (void)delegateMethodC;
+        @end
+
+        @interface PreferDelegateClass : NSObject
+        @property(nonatomic, weak) id<PreferDelegate> delegate;
+        @end
+
+        //.m
+        @interface PreferDelegateClass()
+        {
+            struct {
+                unsigned int methodA : 1;
+                unsigned int methodB : 1;
+                unsigned int methodC : 1;
+            } _delegateFlags;
+        }
+        @end
+
+        @implementation PreferDelegateClass
+
+        - (void)setDelegate:(id<PreferDelegate>)delegate {
+            _delegate = delegate;
+            
+            _delegateFlags.methodA = [delegate respondsToSelector:@selector(delegateMethodA)];
+            _delegateFlags.methodB = [delegate respondsToSelector:@selector(delegateMethodB)];
+            _delegateFlags.methodC = [delegate respondsToSelector:@selector(delegateMethodC)];
+        }
+
+        - (void)callMethodA {
+            if (_delegateFlags.methodA) {
+                [self.delegate delegateMethodA];
+            }
+        }
+
+        @end
+    ```    
+
+    具体代码可参考 [Demo](https://github.com/zj-insist/EffectiveObjCDemo) 项目 `PreferDelegate` 中的内容
+
+### 19. 将一个复杂功能的类拆分到几个分类中实现  
+
+- 通过拆分一个类可以使结构更清晰也更容易 Debug  
+
+- 在一些特定情况下，可以声明一个单独的分类，用于存放框架内调用但不对外开放的方法合集  
+
+### 20. 为第三方分类名称加前缀   
+
+- 向第三方类添加分类时，应添加前缀避免命名冲突  
+
+- 向第三方类添加分类时，应该给分类中的方法添加前缀，否则可能存在覆盖问题  
+
+### 21. 分类中不建议声明属性  
+
+- 一般来说，分类中声明属性是无法合成实例变量的，因此声明是没有作用的，但是可以通过运行时的一些机制绑定对象，但这样容易出现内存管理问题，所以，一般非必须不建议在分类中声明属性  
+
+- 另一方面，在分类中声明属性一般是为了重写 setter 和 getter 方法，使用这些方法做一些便捷操作  
+
+### 22. 类扩展  
+
+- 类扩展在声明形式上可以简单理解为匿名的分类  
+
+- 通过扩展可以向类中添加实例变量  
+
+- 可以再扩展中将声明为只读的属性扩展为对内的读写属性  
+
+- 可以再扩展中对外隐藏遵循的协议  
+
+- 可以优雅的兼容 C++ 相关代码  
+
+### 23. 协议的其他作用  
+
+- 协议可以接口声明的说明文件，给出一个规范，只要遵循此协议的对象，都要根据协议中约束的规范实现，这点很像 Java 中的接口文件  
+
+- 协议可以聚合一类对象，不必关心这类对象的具体类型，而只关注这些对象是不是遵循同一个协议  
+
+- 协议可以变相的实现多继承的特性  
+
+- 协议还可以起到隐藏类型名或者类名的作用  
+
+## 内存管理  
+
+
+ 
 
 
 
