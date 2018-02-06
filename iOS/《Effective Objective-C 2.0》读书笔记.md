@@ -435,7 +435,7 @@
 
 - 使用 `typedef` 给 block 定义一个别名可以让 block 表述更加明确也更易统一修改  
 
-### block 的一些使用技巧  
+### 31. block 的一些使用技巧  
 
 - 使用 block 代替 delegate 处理异步等相关内容可以使代码更加简洁和聚合  
 
@@ -444,6 +444,183 @@
 - 设计 API 时，如果使用 block 的方式进行回调，可以添加一个队列的相关参数，用于指定这个操作是在哪个队列完成  
 
 - 使用 block 时，一定要注意循环引用问题，如果不适用 `__strong` 和 `__weak` 关键字，则一定要在必要的时候打破整个循环引用使对象可以正常释放  
+
+
+### 32. GCD  
+
+- GCD 拥有比一般锁更高的执行效率   
+
+- 使用 `dispatch_barrier_sync(dispatch_queue_t  _Nonnull queue, <^(void)block>)` 来做一些操作的同步可以使同步更加高效  
+
+- 尽量不要使用 `performSelector:` 方法，该方法可能会在 ARC 下导致内存泄露。因为使用了该方法，编译器不知道要调用的选择子是什么，不了解方法签名以及是否有返回值，更是因为不知道方法名，就没法使用 ARC 去管理这块区域，所以 ARC 的做法是不去管理，这就可能存在内存泄露的可能  
+
+### 33. NSOperation  
+
+- NSOperation 与 GCD 都拥有队列的概念，因为 GCD 使用 C 实现，拥有更高的效率， NSOperation 的优势则是作为 OC 对象，更切合 OC 语法，而且还封装了很多相对 GCD 更加便捷的操作   
+
+- NSOperation 可以取消未开始的操作，已经开始的无法取消。相对 GCD 这种创建任务后就不需要关心任务的状态，这种取消操作在一些情况下可能更为便捷   
+
+- 可以指定依赖关系，可以指定类似 A->B->C 的依赖关系，使线程可以更容易的协作  
+
+- NSOperation 支持 KVO，开发者可以对线程的工作状态进行更为细致的监听  
+
+- 可以在同一个队列中指定线程的操作优先级， GCD 虽然拥有队列优先级的概念，但是在队列中没有优先级的划分，这样在实现调度算法相关内容时可以更为便捷  
+
+- NSOperation 作为对象，可以保存操作，因此可以先声明一个 NSOperation ，在需要使用时再调用，而 GCD 则是使用时再声明并调用  
+
+### 34. GCD 队列和 Group  
+
+- 关于主队列、全局队列以及自定义队列和同步、异步任务的的使用关系可以参考下图：  
+
+    ![group](./Images/GCDGroup.png)   
+
+- GCD 中使用 Group 同步几个任务， `dispatch_group_async` 函数用于指定任务所属 Group，将所有任务都加入 Group，当所有任务都执行完毕后，使用 `dispatch_group_notify` 同步几个任务， `dispatch_group_wait` 用于指定在 Group 中任务完成前等待多久，因为会阻塞当前线程，一般不建议在主线程使用  
+
+- `dispatch_group_enter(group)` 与 `dispatch_group_leave(group)` 需要成对出现，相当于信号量同步各个任务，最终也是调用 `dispatch_group_notify` 同步 Group 中的任务  
+
+- 同一个组中的任务可以被放到不同的队列中执行，这样可以区分任务的优先级  
+
+- `dispatch_apply(size_t iterations, dispatch_queue_t  _Nonnull queue, ^(size_t)block)` 可以更高效的执行一个循环，它接收三个参数，第一个是 `iterations` 表示执行循环的次数，会执行 `iterations - 1` 次，第二个表示执行循环操作的队列，此处可以使用一个并行队列，最后是一个执行内容，可以再这里根据传入的 index 不同决定执行不同的代码。之所以更高效是因为这个循环可以使用并行队列，循环的内容会被分发到不同的线程执行，任意时刻可以有数个不同的线程同时执行，所以，如果对结果的顺序没有要求可以使用次方法代替 for 循环之类的提高效率  
+
+    ```objc
+        - (void)applyTest {
+            //可以更高效率的执行一个循环
+            dispatch_apply(10, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(size_t index) {
+                NSLog(@"%zd",index);
+            });
+        }
+
+        2018-02-06 17:44:20.074123+0800 EffectiveObjCDemo[14902:703444] 0
+        2018-02-06 17:44:20.074349+0800 EffectiveObjCDemo[14902:703444] 4
+        2018-02-06 17:44:20.074143+0800 EffectiveObjCDemo[14902:703445] 1
+        2018-02-06 17:44:20.074357+0800 EffectiveObjCDemo[14902:703444] 5
+        2018-02-06 17:44:20.074167+0800 EffectiveObjCDemo[14902:703446] 2
+        2018-02-06 17:44:20.074363+0800 EffectiveObjCDemo[14902:703444] 6
+        2018-02-06 17:44:20.074370+0800 EffectiveObjCDemo[14902:703444] 8
+        2018-02-06 17:44:20.074371+0800 EffectiveObjCDemo[14902:703445] 7
+        2018-02-06 17:44:20.074376+0800 EffectiveObjCDemo[14902:703446] 9
+        2018-02-06 17:44:20.074175+0800 EffectiveObjCDemo[14902:703262] 3
+    ```
+
+    需要注意的是， `dispatch_apply` 会阻塞当前线程直到循环结束，因此使用时需要额外小心  
+
+    关于 GCD 的内容比较多，更多可以参考网上资料，[Demo](https://github.com/zj-insist/EffectiveObjCDemo) 项目 `GCD` 中列出了了部分方法的使用参考  
+
+### 35. dispatch_once  
+
+- `dispatch_once` 可以更高效的保障其中的代码只被执行一次而无需关心是否线程安全，用在单例的初始化上尤其便捷  
+
+### 36. dispatch_get_current_queue 可能导致问题  
+
+- dispatch_get_current_queue 用于获取当前执行的队列，然而使用它作为逻辑判断会有问题，因为队列存在一个层级的概念，具体如下图：  
+
+    ![queue](./Images/queue.jpg)  
+
+    可以看到，在队列 B 和 C 中的任务，虽然调用 dispatch_get_current_queue 方法返回的是队列 B 和队列 C，然而，他们同样是在队列 A 中的任务，如果不去关注与队列 A 的逻辑关系，很容易造成队列 A 中产生死锁，因此一般不建议使用 dispatch_get_current_queue 函数作为队列判断  
+
+## 系统框架  
+
+### 36. 集合遍历  
+
+- 如果处理器性能有盈余，在遍历集合时使用 block 的方式可以选择在多个线程中同时执行遍历提高效率，其原理类似 GCD 中使用 apply 函数  
+
+### 37. 构建缓存使用 NSCache 代替 NSDictionary  
+
+- NSCache 和 NSDictionary 功能类似，但是在构建缓存时 NSCache 拥有更多优势：  
+
+    - NSCache 可以指定容量和内容的最大开销，当容量或者开销大于给定值时，会自动使用最近最少使用算法选择其中的内容进行丢弃，而 NSDictionary 要实现这样的功能需要自己编写相关逻辑  
+
+    - NSCache 是线程安全的，我们可以放心的使用 NSCache 执行操作，而不必关心因为异步导致的数据不同步  
+
+    - 可以通过指定的容量和内容最大开销来操控缓存的删除时机，虽然可以控制删除时机，但是想要通过此方式删除指定对象是不合理的，具体删除哪个对象是根据具体实现决定的  
+
+- 添加对象到 NSCache 时可以设置开销值，这样可以使缓存更容易的决定何时移除对象，当然并不是每次加入缓存时给定开销都是合理的，如果加入缓存的对象开销很难计算或者计算周期过长，这时还计算开销，显然是不合理的  
+
+-  NSPurgeableData 与 NSCache 搭配使用可以实现数据自动清除的功能，当 NSPurgeableData 对象的内存被系统回收后，缓存中会自动移除这个对象  
+
+- 缓存的作用是为了节省一些费时操作而做的短暂存储，应该理解和合理应用这种机制  
+
+    缓存的设计无非是提高整个程序的运行效率，设计方案都大同小异，可以参考 YYCache 看看如何实现一个优秀的缓存，[Demo](https://github.com/zj-insist/EffectiveObjCDemo) 项目 `NSCache` 中列出了 NSCache 的简单使用   
+
+### 38. 精简 initialize 和 load 函数  
+
+- 当分类和其所属的类都定义了 load 方法，会先调用类里的 load 方法再调用分类的，load 方法不参与覆写机制    
+
+- load 函数执行时，系统处于“脆弱时期”，这个时候哪些类加载哪些类没有加载并不清楚，因此尽量不要在类的 load 方法中调用其他类  
+
+- load 方法运行时整个程序是被阻塞的，无法响应，因此，应该精简 load 中执行的操作，同时不要在 load 中添加锁相关的等待内容  
+
+- initialize 方法只有在系统第一次使用此类时调用，而且只会调用一次，而 load 方法则是在系统运行时，所有类的 load 方法都会被调用。initialize 方法只能由系统调用，绝不应该主动调用   
+
+- initialize 是线程安全的，此外， initialize 方法执行时，系统是处于正常状态的，可以在此时调用其他类  
+
+- 如果子类没有实现 initialize 方法，便会便会调用父类的 initialize 方法  
+
+- initialize 通常用来初始化在编译器无法设定的全局变量  
+
+- 不要过分依赖 initialize 和 load 方法执行类的初始化，如果可行应该提供一个初始化方法给使用者，让使用者每次使用该类时调用，单例便是一个很好的例子  
+
+### 39. NSTimer 会保留目标对象  
+
+- NSTimer 需要放入“运行循环”中才能生效，放入不同模式的运行循环会有不同的效果   
+
+- NSTimer 不使用后一定要调用 invalidate 方法停止，并在之后将其置为 nil
+
+- 使用 NSTimer 时可能会产生循环引用，因为 NSTimer 会保留其引用的对象，使用 block 的方式可以避免这种循环引用  
+
+    ```objc   
+        @implementation NSTimer (EOCBlocksSupport)
+
+        + (NSTimer *)eoc_secheduleTimerWithTimeInterval:(NSTimeInterval)interval block:(void(^)(void))block repeats:(BOOL)repeats {
+            return [self scheduledTimerWithTimeInterval:interval target:self selector:@selector(eco_blockInvoke:) userInfo:[block copy] repeats:repeats];
+        }
+
+        + (void)eco_blockInvoke:(NSTimer *)timer {
+            void (^block)(void) = timer.userInfo;
+            if (block) {
+                block();
+            }
+        }
+        @end
+
+
+        @interface PracticeClass()
+
+        @property(nonatomic, strong) NSTimer *timer;
+
+        @end
+
+        @implementation PracticeClass
+
+        - (void)dealloc {
+            [_timer invalidate];
+        }
+
+        - (void)stopTimer {
+            [_timer invalidate];
+            _timer = nil;
+        }
+
+        - (void)starTimer {
+            __weak __typeof(self)weakSelf = self;
+            _timer = [NSTimer eoc_secheduleTimerWithTimeInterval:5 block:^{
+                __strong __typeof(weakSelf)strongSelf = weakSelf;
+                [strongSelf doSomething];
+            } repeats:YES];
+        }
+
+        - (void)doSomething {
+            NSLog(@"%s",__func__);
+        }
+
+        @end
+    ```   
+
+    如上方式，因为使用了 __weak 关键字，使 NSTimer 不再保留当前对象，打破了整个循环引用，因此对象都可正常释放
+
+- 在 dealloc 中不要使用 self 关键字，此时 self 可能已经被销毁，无法使用，应该使用带下划线的实例变量  
+
+## 后感  
 
 
 
