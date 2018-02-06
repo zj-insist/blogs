@@ -450,7 +450,7 @@
 
 - GCD 拥有比一般锁更高的执行效率   
 
-- 使用 `dispatch_barrier_sync(dispatch_queue_t  _Nonnull queue, <^(void)block>)` 来做一些操作的同步可以使同步更加高效  
+- 使用 `dispatch_barrier_sync(dispatch_queue_t  _Nonnull queue, ^(void)block)` 来做一些操作的同步可以使同步更加高效  
 
 - 尽量不要使用 `performSelector:` 方法，该方法可能会在 ARC 下导致内存泄露。因为使用了该方法，编译器不知道要调用的选择子是什么，不了解方法签名以及是否有返回值，更是因为不知道方法名，就没法使用 ARC 去管理这块区域，所以 ARC 的做法是不去管理，这就可能存在内存泄露的可能  
 
@@ -480,7 +480,7 @@
 
 - 同一个组中的任务可以被放到不同的队列中执行，这样可以区分任务的优先级  
 
-- `dispatch_apply(size_t iterations, dispatch_queue_t  _Nonnull queue, ^(size_t)block)` 可以更高效的执行一个循环，它接收三个参数，第一个是 `iterations` 表示执行循环的次数，会执行 `iterations - 1` 次，第二个表示执行循环操作的队列，此处可以使用一个并行队列，最后是一个执行内容，可以再这里根据传入的 index 不同决定执行不同的代码。之所以更高效是因为这个循环可以使用并行队列，循环的内容会被分发到不同的线程执行，任意时刻可以有数个不同的线程同时执行，所以，如果对结果的顺序没有要求可以使用次方法代替 for 循环之类的提高效率  
+- `dispatch_apply(size_t iterations, dispatch_queue_t  _Nonnull queue, ^(size_t)block)` 可以更高效的执行一个循环，它接收三个参数，第一个是 `iterations` 表示执行循环的次数，会执行 `iterations - 1` 次，第二个表示执行循环操作的队列，此处可以使用一个并行队列，最后是一个执行内容，可以再这里根据传入的 index 不同决定执行不同的代码。之所以更高效是因为这个循环可以使用并行队列，循环的内容会被分发到不同的线程执行，任意时刻可以有数个不同的线程同时执行，所以，如果对结果的顺序没有要求可以使用次方法代替 for 循环之类的提高效率  
 
     ```objc
         - (void)applyTest {
