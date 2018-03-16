@@ -1,5 +1,5 @@
 # blogs
-记录相关
+记录
 
 [iOS](https://github.com/zj-insist/blogs/tree/master/iOS)  
 [1. NSNotificationCenter 的一些坑点](https://github.com/zj-insist/blogs/blob/master/iOS/NSNotificationCenter%E7%9A%84%E4%B8%80%E4%BA%9B%E5%9D%91%E7%82%B9.md)  
