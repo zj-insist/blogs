@@ -1,3 +1,5 @@
+# iOS 知识小集
+
 ## [Tip 32](https://mp.weixin.qq.com/s/ny0wnRZZr1Xr7UCeJ4xZLQ)
 
 1、利用 GCD 信号量将异步方法改造为同步方法
@@ -23,3 +25,28 @@
 
 **文章**  
 [单一职责原则在 iOS 中的应用](https://mp.weixin.qq.com/s/owzQOIXbvwYBTBvfrMybnw)
+
+## [Tip 29](https://mp.weixin.qq.com/s/s5crnjMG-fCAfWVZ3q83yg)
+
+1、几个第三方框架关于线程锁的封装小技巧
+
+- YYCache
+
+![20181025154044846134728.jpg](https://qs-image-bucket.oss-cn-hangzhou.aliyuncs.com/20181025154044846134728.jpg)
+
+- SDWebImage
+
+![20181025154044848831538.jpg](https://qs-image-bucket.oss-cn-hangzhou.aliyuncs.com/20181025154044848831538.jpg)
+
+- YYWebImage
+
+![20181025154044850630180.jpg](https://qs-image-bucket.oss-cn-hangzhou.aliyuncs.com/20181025154044850630180.jpg)
+
+## [Tip 27](https://mp.weixin.qq.com/s/s5crnjMG-fCAfWVZ3q83yg)
+
+1、利用 Storyboard Reference 给 storyboard 瘦身
+
+2、
+
+**文章**  
+[黑幕背后的 Code Signing](https://mp.weixin.qq.com/s/Ml9UteoAB0KrWLU9dPht6g)
